@@ -33,7 +33,7 @@ doa17LaunchEnvironment.with{
     env('PROJECT_NAME', projectFolderName)
   }
   parameters{
-    stringParam("AWS_REGION",'',"Default AWS Region")
+    stringParam("AWS_REGION",'us-east-1',"Default AWS Region")
     stringParam("ENVIRONMENT_NAME",'',"Name of your Environment")
     stringParam("WEB_APP_PROFILE",'',"Web App Instance Profile from DevOps-Workshop-Networking stack")
     stringParam("WEB_APP_SG",'',"Web App SG from DevOps-Workshop-Networking stack")
