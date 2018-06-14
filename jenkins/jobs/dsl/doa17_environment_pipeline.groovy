@@ -1,11 +1,3 @@
-
-// Folders
-def workspaceFolderName = "${WORKSPACE_NAME}"
-def projectFolderName = "${PROJECT_NAME}"
-
-// Variables
-def infrastructureRepository = "ssh://jenkins@gerrit:29418/${PROJECT_NAME}/doa17-infrastructure"
-
 // Views
 def doa17EnvironmentPipeline = buildPipelineView(projectFolderName + "/DOA17_Environment_Pipeline")
 
@@ -40,14 +32,12 @@ doa17LaunchEnvironment.with{
     stringParam("PUBLIC_SUBNET",'',"Public Subnet from DevOps-Workshop-Networking stack")
     stringParam("CODE_DEPLOY_ARN",'',"IAM Role ARN from DevopsWorkshop-raem-roles stack")
   }
-
-  }
   wrappers {
     preBuildCleanup()
     maskPasswords()
   }
   label("docker")
-    scm{
+  scm{
     git{
       remote{
         url(infrastructureRepository)
@@ -56,8 +46,7 @@ doa17LaunchEnvironment.with{
       branch("*/master")
     }
   }
-    steps { 
-    
+  steps {
     shell('''
 set +x
 
@@ -77,6 +66,7 @@ echo "[INFO] DevopsWorkshop-${ENVIRONMENT_NAME} Stack Created"
 
 echo "[INFO] Creating Code Build Project"
 aws codebuild create-project --cli-input-json file://${WORKSPACE}/create-project.json
+
 set -x'''.stripMargin()
     )
   }
@@ -92,7 +82,6 @@ set -x'''.stripMargin()
   }
 }
 
-
 // Job DOA17_Create_Application
 doa17CreateApplication.with{
   description("Job Description")
@@ -107,7 +96,7 @@ doa17CreateApplication.with{
     stringParam("WEB_APP_SG",'',"Web App SG from DevOps-Workshop-Networking stack")
     stringParam("PUBLIC_SUBNET",'',"Public Subnet from DevOps-Workshop-Networking stack")
     stringParam("CODE_DEPLOY_ARN",'',"IAM Role ARN from DevopsWorkshop-raem-roles stack")
-}
+  }
   wrappers {
     preBuildCleanup()
     maskPasswords()
@@ -146,15 +135,13 @@ doa17CreateDevelopmentGroup.with{
     env('PROJECT_NAME', projectFolderName)
   }
   parameters{
-  stringParam("AWS_REGION",'',"Default AWS Region")i
+    stringParam("AWS_REGION",'',"Default AWS Region")
     stringParam("ENVIRONMENT_NAME",'',"Name of your Environment")
     stringParam("WEB_APP_PROFILE",'',"Web App Instance Profile from DevOps-Workshop-Networking stack")
     stringParam("WEB_APP_SG",'',"Web App SG from DevOps-Workshop-Networking stack")
     stringParam("PUBLIC_SUBNET",'',"Public Subnet from DevOps-Workshop-Networking stack")
-    stringParam("CODE_DEPLOY_ARN",'',"IAM Role ARN from DevopsWorkshop-raem-roles stack")  
+    stringParam("CODE_DEPLOY_ARN",'',"IAM Role ARN from DevopsWorkshop-raem-roles stack")
   }
-
-
   wrappers {
     preBuildCleanup()
     maskPasswords()
@@ -177,7 +164,7 @@ set -x'''.stripMargin()
     downstreamParameterized{
       trigger(projectFolderName + "/DOA17_Create_Production_Group"){
         condition("UNSTABLE_OR_BETTER")
-        parameters8{
+        parameters{
           currentBuild()
         }
       }
@@ -199,7 +186,6 @@ doa17CreateProductionGroup.with{
     stringParam("WEB_APP_SG",'',"Web App SG from DevOps-Workshop-Networking stack")
     stringParam("PUBLIC_SUBNET",'',"Public Subnet from DevOps-Workshop-Networking stack")
     stringParam("CODE_DEPLOY_ARN",'',"IAM Role ARN from DevopsWorkshop-raem-roles stack")
-    
   }
   wrappers {
     preBuildCleanup()
@@ -215,6 +201,7 @@ echo "[INFO] Default region is set to $AWS_DEFAULT_REGION"
 
 echo "[INFO] Creating Code Deploy Deployment Group ${ENVIRONMENT_NAME}-ProdWebApp"
 aws deploy create-deployment-group --application-name ${ENVIRONMENT_NAME}-WebApp  --deployment-config-name CodeDeployDefault.OneAtATime --deployment-group-name ${ENVIRONMENT_NAME}-ProdWebApp --ec2-tag-filters Key=Name,Value=${ENVIRONMENT_NAME}-ProdWebApp,Type=KEY_AND_VALUE --service-role-arn ${CODE_DEPLOY_ARN}
+
 
 set -x'''.stripMargin()
     )
